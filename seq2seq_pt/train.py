@@ -17,7 +17,6 @@ except ImportError:
 from nltk.translate import bleu_score
 from s2s.xinit import xavier_normal, xavier_uniform
 import os
-from PyRouge.Rouge import Rouge
 import xargs
 
 parser = argparse.ArgumentParser(description='train.py')
@@ -150,12 +149,10 @@ def load_dev_data(translator, src_file, bio_file, feat_files, tgt_file):
 
 evalModelCount = 0
 totalBatchCount = 0
-rouge_calculator = Rouge.Rouge()
 
 
 def evalModel(model, translator, evalData):
     global evalModelCount
-    global rouge_calculator
     evalModelCount += 1
     ofn = 'dev.out.{0}'.format(evalModelCount)
     if opt.save_path:
@@ -187,16 +184,9 @@ def evalModel(model, translator, evalData):
                 translator.buildTargetTokens(pred[b][n], src_batch[b],
                                              predIsCopy[b][n], predCopyPosition[b][n], attn[b][n])
             )
-        # gold += [' '.join(r) for r in tgt_batch]
-        # predict += [' '.join(sents) for sents in predBatch]
         # nltk BLEU evaluator needs tokenized sentences
         gold += [[r] for r in tgt_batch]
         predict += predBatch
-    # no_copy_mark_predict = [sent.replace('[[', '').replace(']]', '').
-    #                             replace('<ss>', '').replace('</ss>', '') for sent in predict]
-    # no_sent_bos_eos_mark_gold = [sent.replace('<ss>', '').replace('</ss>', '') for sent in gold]
-    # scores = rouge_calculator.compute_rouge(no_sent_bos_eos_mark_gold, no_copy_mark_predict)
-    # report_metric = scores['rouge-2']['f'][0]
 
     no_copy_mark_predict = [[word.replace('[[', '').replace(']]', '') for word in sent] for sent in predict]
     bleu = bleu_score.corpus_bleu(gold, no_copy_mark_predict)
@@ -204,7 +194,6 @@ def evalModel(model, translator, evalData):
 
     with open(ofn, 'w', encoding='utf-8') as of:
         for p in predict:
-            # of.write(p + '\n')
             of.write(' '.join(p) + '\n')
     return report_metric
 
