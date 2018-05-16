@@ -23,7 +23,7 @@ If you find this code useful in your research, please consider citing:
 
 ### Prepare the dataset and code
 
-Make a experiment home folder for NQG data and code:
+Make an experiment home folder for NQG data and code:
 ```bash
 NQG_HOME=~/workspace/nqg
 mkdir -p $NQG_HOME/code
