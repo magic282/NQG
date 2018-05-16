@@ -6,7 +6,7 @@ This repository contains code for the  paper "[Neural Question Generation from T
 The experiments in the paper were done with an in-house deep learning tool. Therefore, we re-implement this with PyTorch as a reference.
 
 This code only implements the setting `NQG+` in the paper.
-Within 1 hour's training on Tesla P100, the `NQG+` model achieves 12.78 BLEU-4 score on the dev set as reported in our paper.
+Within 1 hour's training on Tesla P100, the `NQG+` model achieves 12.78 BLEU-4 score on the dev set.
 
 If you find this code useful in your research, please consider citing:
 
