@@ -19,6 +19,8 @@ parser.add_argument('-model', required=True,
                     help='Path to model .pt file')
 parser.add_argument('-src', required=True,
                     help='Source sequence to decode (one line per sequence)')
+parser.add_argument('-bio')
+parser.add_argument('-feats', default=[], nargs='+', type=str)
 parser.add_argument('-tgt',
                     help='True target sequence (optional)')
 parser.add_argument('-output', default='pred.txt',
@@ -66,7 +68,6 @@ def addPair(f1, f2):
 
 
 def main():
-    raise Exception('Not implemented')
     opt = parser.parse_args()
     logger.info(opt)
     opt.cuda = opt.gpu > -1
@@ -80,15 +81,22 @@ def main():
     predScoreTotal, predWordsTotal, goldScoreTotal, goldWordsTotal = 0, 0, 0, 0
 
     srcBatch, tgtBatch = [], []
+    bio_batch, feats_batch = [], []
 
     count = 0
 
     tgtF = open(opt.tgt) if opt.tgt else None
+    bioF = open(opt.bio, encoding='utf-8')
+    featFs = [open(x, encoding='utf-8') for x in opt.feats]
     for line in addone(open(opt.src, encoding='utf-8')):
 
         if (line is not None):
             srcTokens = line.strip().split(' ')
             srcBatch += [srcTokens]
+            bio_tokens = bioF.readline().strip().split(' ')
+            bio_batch += [bio_tokens]
+            feats_tokens = [reader.readline().strip().split((' ')) for reader in featFs]
+            feats_batch += [feats_tokens]
             if tgtF:
                 tgtTokens = tgtF.readline().split(' ') if tgtF else None
                 tgtBatch += [tgtTokens]
@@ -100,7 +108,7 @@ def main():
             if len(srcBatch) == 0:
                 break
 
-        predBatch, predScore, goldScore = translator.translate(srcBatch, tgtBatch)
+        predBatch, predScore, goldScore = translator.translate(srcBatch, bio_batch, feats_batch, tgtBatch)
 
         predScoreTotal += sum(score[0] for score in predScore)
         predWordsTotal += sum(len(x[0]) for x in predBatch)
@@ -136,6 +144,7 @@ def main():
                 logger.info('')
 
         srcBatch, tgtBatch = [], []
+        bio_batch, feats_batch = [], []
 
     reportScore('PRED', predScoreTotal, predWordsTotal)
     # if tgtF:

@@ -200,14 +200,14 @@ class Translator(object):
 
         return allHyp, allScores, allIsCopy, allCopyPosition, allAttn, None
 
-    def translate(self, srcBatch, goldBatch):
+    def translate(self, srcBatch, bio_batch, feats_batch, goldBatch):
         #  (1) convert words to indexes
-        dataset = self.buildData(srcBatch, goldBatch)
+        dataset = self.buildData(srcBatch, bio_batch, feats_batch, goldBatch)
         # (wrap(srcBatch),  lengths), (wrap(tgtBatch), ), indices
-        src, tgt, indices = dataset[0]
+        src, bio, feats, tgt, indices = dataset[0]
 
         #  (2) translate
-        pred, predScore, predIsCopy, predCopyPosition, attn, _ = self.translateBatch(src, tgt)
+        pred, predScore, predIsCopy, predCopyPosition, attn, _ = self.translateBatch(src, bio, feats, tgt)
         pred, predScore, predIsCopy, predCopyPosition, attn = list(zip(
             *sorted(zip(pred, predScore, predIsCopy, predCopyPosition, attn, indices),
                     key=lambda x: x[-1])))[:-1]
